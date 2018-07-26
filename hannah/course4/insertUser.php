@@ -11,7 +11,7 @@
 $users = $_POST['users'];//this is an array sent from client
 
 function createProfileConnection(){
-  return new mysqli('localhost','challengefuj1','password','challenge-fuj1');
+  return new mysqli('localhost','users','XPI2g69n4INDEjaw','challenge');
 }
 
 $conn = createProfileConnection();
