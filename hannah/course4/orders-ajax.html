@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Orders AJAX</title>
+</head>
+
+<body>
+
+    <h1>Orders AJAX</h1>
+
+    <button id="getCustomers-btn">Get Customers</button>
+
+    <H2>Customers</H2>
+
+    <ul id="customers-list"></ul>
+
+    <table border="1" id="orders-table"></table>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+    <script>
+        class Renderer {
+
+            renderCustomers(data) {
+                //loop thru the data
+                for (var i = 0; i < data.length; i++) {
+                    var li = '<li>';
+                    li += '<a data-customerid="' + data[i].customer_id + '" class="customer-link" href="#">' + data[i].customer_name + '</a>';
+                    li += '</li>';
+                    $('#customers-list').append(li);
+                }
+            }
+
+            renderOrders(data) {
+                //first clear the exisiting data from the table
+                $('#orders-table').html('');
+                //create a table row for each order and append to orders-table
+
+                for (var i = 0; i < data.length; i++) {
+
+                    var tbl = '<tr>';
+                    tbl += '<td>' + data[i].product_name + '</td>';
+                    tbl += '<td>' + data[i].product_description + '</td>';
+                    tbl += '<td>' + data[i].product_cost + '</td>';
+                    $('#orders-table').append(tr);
+
+
+                }
+
+            }
+        }
+        //we are going to define a class to get data from the back end
+        class Communicator {
+
+            //the constructor method runs automatically when a new instance of this class is created
+            constructor(url) {
+                console.log(url);
+                this.url = url;
+            }
+
+            getCustomers() {
+                $.ajax({
+                    url: this.url,
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        task: 'getCustomers'
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        renderer.renderCustomers(data);
+                    },
+                    error: function(x, m, s) {
+                        console.log(m)
+                    }
+                });
+            }
+
+            getOrders(customerId) {
+                $.ajax({
+                    url: this.url,
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        task: 'getOrders',
+                        id: customerId
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        //renderer.renderOrders(data);
+                    },
+                    error: function(x, m, s) {
+                        console.log(m)
+                    }
+                });
+            }
+
+        }
+
+        var comm = new Communicator('getData.php');
+        var renderer = new Renderer();
+
+        $(document).ready(function() {
+
+            $('#getCustomers-btn').click(function() {
+                comm.getCustomers();
+            });
+
+            //we have to use the on() method to listen for links because the .customer-links are created dynaically after the page is ready
+            $('#customers-list').on('click', '.customer-link', function() {
+                comm.getOrders($(this).data('customerid'));
+            });
+
+        });
+    </script>
+
+
+
+</body>
+</html>

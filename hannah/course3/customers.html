@@ -1,0 +1,113 @@
+<html>
+
+
+<head>
+
+</head>
+
+
+
+<body>
+
+    <!--    create a view component to display a list of customers-->
+    <table id="customers">
+        <thead>
+            <tr>
+                <th>Customer Number</th>
+                <th>Customer Name</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+
+
+    <!--     link to the jquery javascript code library    -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/handlebars-v4.0.11.js"></script>
+
+    <script>
+        //define a class to render into the view
+        class Renderer {
+
+            constructor() {}
+
+            static renderCustomers(data) {
+                //we need to create an object which has a property (customers) expected by the handlebars template (customerTemplate)
+                var dataObj = {
+                    customers:data
+                }
+                
+                //write algorithm to fix the problem (remove + symbols and html entities)
+                for(var i = 0 ; i < dataObj.customers.length ; i++){
+                    var nameToFix = dataObj.customers[i].customerName;
+                    
+                    nameToFix = nameToFix.replace(/\+/g,' ');//regular expression to remove all + symbols
+                    nameToFix = unescape(nameToFix);//unescape converts all html entities
+                    dataObj.customers[i].customerName = nameToFix;
+                }
+                
+                var source = document.getElementById('customersTemplate').innerHTML;
+                var template = Handlebars.compile(source);
+                var html = template(dataObj);
+                $('#customers tbody').html(html);
+
+            } //end renderCustomers()
+
+        }
+
+
+
+        //define a class which will be used to communicate witht he back end - NOTE this is the latest version of javascript (ES6 ECMAScript) - it will only work in the latest browsers
+
+        class Commuincator {
+
+            constructor() {}
+
+            getData(dataUrl) {
+
+                //use the jquery ajax method to get the data from the back end asynchronously (Asynchronously Javascript And XML) 
+                $.ajax({
+                    url: dataUrl,
+                    type: 'get',
+                    dataType: 'json', //javascript object notation
+                    success: function(data) {
+                        Renderer.renderCustomers(data);
+                    },
+                    error: function(xmlHttpRequest, message, status) {
+                        console.log(message);
+                    }
+                });
+
+            } //end of getData
+
+        }
+
+        var comm = new Commuincator();
+
+        comm.getData('customers.php');
+
+    </script>
+
+    <!--    define a template for handlebars-->
+    <script id="customersTemplate" type="text/x-handlebars-template">
+        {{#each customers}}
+
+        <tr>
+
+            <td>{{customerNumber}}</td>
+            <td>{{customerName}}</td>
+
+        </tr>
+
+        {{/each}}
+
+    </script>
+
+</body>
+
+
+
+
+
+</html>
